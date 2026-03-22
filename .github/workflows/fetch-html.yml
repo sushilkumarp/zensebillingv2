@@ -1,0 +1,30 @@
+name: Fetch and commit index.html
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'index.html'
+
+jobs:
+  fetch-html:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Fetch index.html from live site
+        run: |
+          curl -L https://zensebillingv2.netlify.app/ -o index.html
+          echo "Fetched index.html"
+          wc -c index.html
+      
+      - name: Commit index.html
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Auto-fetch index.html from live site"
+          git push
